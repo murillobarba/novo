@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Vendas, Estoque & Catálogo Digital</title>
+  <title>Sistema de Vendas & Catálogo Digital</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
   <style>
@@ -11,7 +11,7 @@
     .nav-tabs .nav-link { font-weight: 600; color: #495057; }
     .nav-tabs .nav-link.active { color: #0d6efd; border-bottom: 3px solid #0d6efd; background-color: #fff; }
     .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .img-preview { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; }
+    .img-preview { width: 64px; height: 48px; object-fit: cover; border-radius: 8px; }
     .badge-stock { font-size: 0.85rem; }
     .metric-card { transition: transform 0.2s; }
     .metric-card:hover { transform: translateY(-3px); }
@@ -19,26 +19,33 @@
     .btn-gcal { background-color: #fff; color: #1a73e8; border: 1px solid #dadce0; font-size: 0.78rem; font-weight: 600; }
     .btn-gcal:hover { background-color: #f1f8fe; color: #174ea6; border-color: #1a73e8; }
     
-    /* Estilos do Catálogo */
-    .catalogo-card { transition: transform 0.2s, box-shadow 0.2s; border-radius: 16px; overflow: hidden; }
-    .catalogo-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-    .catalogo-img { width: 100%; height: 220px; object-fit: cover; background-color: #f8f9fa; }
-    .catalogo-preco { font-size: 1.35rem; font-weight: 700; color: #198754; }
+    /* Estilos do Catálogo com Proporção 16:9 Adaptável */
+    .catalogo-card { transition: transform 0.2s, box-shadow 0.2s; border-radius: 14px; overflow: hidden; background: #fff; border: 1px solid #e9ecef; }
+    .catalogo-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+    .catalogo-img-container { width: 100%; aspect-ratio: 16 / 9; background-color: #f8f9fa; overflow: hidden; position: relative; }
+    .catalogo-img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s; }
+    .catalogo-card:hover .catalogo-img { transform: scale(1.03); }
+    .btn-whatsapp { background-color: #25d366; color: #fff; font-weight: 600; border: none; }
+    .btn-whatsapp:hover { background-color: #20bd5a; color: #fff; }
   </style>
 </head>
 <body>
 
 <div class="container py-4">
-  <!-- Cabeçalho -->
+  <!-- Cabeçalho Principal -->
   <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
-      <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-shop text-primary me-2"></i>Controle de Vendas & Catálogo</h2>
-      <p class="text-muted mb-0">Gestão de estoque, cobranças com Google Agenda e vitrine para clientes</p>
+      <h2 class="fw-bold mb-0 text-dark" id="headerNomeLoja"><i class="bi bi-shop text-primary me-2"></i>Minha Loja & Vendas</h2>
+      <p class="text-muted mb-0">Controle de estoque, vendas a prazo, agenda e vitrine digital</p>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-primary btn-sm" onclick="abrirAbaCatalogo()"><i class="bi bi-grid me-1"></i> Ver Catálogo Público</button>
+      <button class="btn btn-outline-secondary btn-sm" onclick="abrirModalConfig()"><i class="bi bi-gear me-1"></i> Configurações</button>
     </div>
   </div>
 
   <!-- Métricas Rápidas -->
-  <div class="row g-3 mb-4" id="secaoMetricas">
+  <div class="row g-3 mb-4">
     <div class="col-md-3 col-6">
       <div class="card p-3 bg-white metric-card">
         <span class="text-muted small fw-bold">TOTAL VENDIDO</span>
@@ -53,7 +60,7 @@
     </div>
     <div class="col-md-3 col-6">
       <div class="card p-3 bg-white metric-card">
-        <span class="text-muted small fw-bold">A RECEBER</span>
+        <span class="text-muted small fw-bold">A RECEBER (PENDENTE)</span>
         <h4 class="fw-bold text-danger mb-0" id="dashPendente">R$ 0,00</h4>
       </div>
     </div>
@@ -71,7 +78,7 @@
       <button class="nav-link active" id="vendas-tab" data-bs-toggle="tab" data-bs-target="#vendas" type="button"><i class="bi bi-cart-check me-2"></i>Registrar Venda</button>
     </li>
     <li class="nav-item">
-      <button class="nav-link" id="catalogo-tab" data-bs-toggle="tab" data-bs-target="#catalogo" type="button"><i class="bi bi-grid me-2"></i>Catálogo / Vitrine</button>
+      <button class="nav-link" id="catalogo-tab" data-bs-toggle="tab" data-bs-target="#catalogo" type="button"><i class="bi bi-bag-heart me-2 text-danger"></i>Catálogo de Produtos</button>
     </li>
     <li class="nav-item">
       <button class="nav-link" id="cobrancas-tab" data-bs-toggle="tab" data-bs-target="#cobrancas" type="button"><i class="bi bi-cash-coin me-2"></i>Contas a Receber & Agenda</button>
@@ -180,7 +187,7 @@
                 <div class="mt-3">
                   <label class="form-label small fw-bold text-dark d-flex justify-content-between">
                     <span>Datas e Valores de Cada Parcela:</span>
-                    <span class="text-muted fw-normal">Pode ajustar as datas livremente</span>
+                    <span class="text-muted fw-normal">Datas editáveis</span>
                   </label>
                   <div id="containerGradeParcelas" class="d-flex flex-column gap-2"></div>
                 </div>
@@ -227,25 +234,27 @@
       </div>
     </div>
 
-    <!-- ABA: CATÁLOGO DIGITAL (VITRINE) -->
+    <!-- ABA: CATÁLOGO DIGITAL (VITRINE 16:9) -->
     <div class="tab-pane fade" id="catalogo" role="tabpanel">
-      <div class="card p-4 mb-4">
-        <div class="row align-items-center g-3">
-          <div class="col-md-6">
-            <h4 class="fw-bold mb-1"><i class="bi bi-bag-check text-success me-2"></i>Catálogo & Vitrine Digital</h4>
-            <p class="text-muted mb-0">Exibição de produtos com fotos e preços pronta para compartilhar</p>
+      <div class="card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <div>
+            <h4 class="fw-bold mb-1 text-dark" id="catalogoTituloLoja">Vitrine & Catálogo Online</h4>
+            <p class="text-muted mb-0">Visualização profissional em alta definição para seus clientes</p>
           </div>
-          <div class="col-md-6">
-            <div class="input-group">
-              <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-              <input type="text" class="form-control" id="buscaCatalogo" placeholder="Buscar produto por nome..." oninput="renderCatalogo()">
+          <div class="d-flex gap-2">
+            <div class="input-group input-group-sm" style="max-width: 250px;">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="text" class="form-control" id="buscaCatalogo" placeholder="Buscar produto..." oninput="renderCatalogo()">
             </div>
+            <button class="btn btn-outline-success btn-sm" onclick="copiarLinkCatalogo()"><i class="bi bi-share me-1"></i> Compartilhar Catálogo</button>
           </div>
         </div>
-      </div>
 
-      <!-- Grid de Cards do Catálogo -->
-      <div class="row g-4" id="gridCatalogo"></div>
+        <div class="row g-4" id="gridCatalogo">
+          <!-- Cards de produtos serão inseridos aqui -->
+        </div>
+      </div>
     </div>
 
     <!-- ABA: CONTAS A RECEBER & GOOGLE AGENDA -->
@@ -284,7 +293,7 @@
       </div>
     </div>
 
-    <!-- ABA: PRODUTOS -->
+    <!-- ABA: PRODUTOS & ESTOQUE -->
     <div class="tab-pane fade" id="produtos" role="tabpanel">
       <div class="row g-4">
         <div class="col-lg-4">
@@ -294,7 +303,7 @@
               <input type="hidden" id="prodId">
               <div class="mb-3">
                 <label class="form-label fw-bold">Nome do Produto *</label>
-                <input type="text" class="form-control" id="prodNome" required placeholder="Ex: Perfume Floral">
+                <input type="text" class="form-control" id="prodNome" required placeholder="Ex: Camiseta Básica">
               </div>
               <div class="row g-2 mb-3">
                 <div class="col-6">
@@ -311,10 +320,10 @@
                 <input type="number" class="form-control" id="prodEstoque" min="0" required placeholder="0">
               </div>
               <div class="mb-3">
-                <label class="form-label fw-bold">Foto do Produto</label>
+                <label class="form-label fw-bold">Foto do Produto (Aceita 16:9, Horizontal ou Retangular)</label>
                 <input type="file" class="form-control" id="prodFoto" accept="image/*" onchange="previewImagem(event)">
                 <div class="mt-2 text-center" id="boxPreviewFoto" style="display:none;">
-                  <img id="previewImg" src="" class="img-preview rounded shadow-sm border" style="width: 80px; height: 80px;">
+                  <img id="previewImg" src="" class="rounded shadow-sm border" style="width: 100%; max-height: 160px; object-fit: cover; aspect-ratio: 16/9;">
                 </div>
               </div>
               <div class="d-flex gap-2">
@@ -327,7 +336,7 @@
 
         <div class="col-lg-8">
           <div class="card p-4">
-            <h5 class="fw-bold mb-3">Catálogo de Produtos</h5>
+            <h5 class="fw-bold mb-3">Catálogo de Produtos & Gestão</h5>
             <div class="table-responsive">
               <table class="table table-hover align-middle">
                 <thead class="table-light">
@@ -357,7 +366,7 @@
             <form id="formCliente">
               <div class="mb-3">
                 <label class="form-label fw-bold">Nome Completo *</label>
-                <input type="text" class="form-control" id="cliNome" required placeholder="Ex: Maria Silva">
+                <input type="text" class="form-control" id="cliNome" required placeholder="Ex: João da Silva">
               </div>
               <div class="mb-3">
                 <label class="form-label fw-bold">Telefone / WhatsApp</label>
@@ -422,6 +431,46 @@
   </div>
 </div>
 
+<!-- Modal de Configurações da Loja e Backup -->
+<div class="modal fade" id="modalConfig" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold"><i class="bi bi-gear me-2"></i>Configurações da Loja & Backup</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formConfig">
+          <div class="mb-3">
+            <label class="form-label fw-bold">Nome da Loja</label>
+            <input type="text" class="form-control" id="cfgNomeLoja" placeholder="Ex: Minha Loja Fashion">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">WhatsApp para Pedidos (com DDD)</label>
+            <input type="text" class="form-control" id="cfgWhatsapp" placeholder="Ex: 5511999998888">
+            <small class="text-muted">Apenas números (Ex: 55 + DDD + Número)</small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Chave Pix</label>
+            <input type="text" class="form-control" id="cfgChavePix" placeholder="Chave Pix (E-mail, CPF, Telefone ou Aleatória)">
+          </div>
+          <button type="submit" class="btn btn-primary w-100 fw-bold mb-3">Salvar Configurações</button>
+        </form>
+
+        <hr>
+        <h6 class="fw-bold mb-2">Backup dos Seus Dados</h6>
+        <p class="small text-muted mb-2">Exporte seus produtos e vendas em um arquivo para não perder nada ou para transferir para outro aparelho.</p>
+        <div class="d-flex gap-2 mb-2">
+          <button class="btn btn-outline-dark btn-sm flex-grow-1" onclick="exportarBackup()"><i class="bi bi-download me-1"></i> Baixar Backup</button>
+          <label class="btn btn-outline-secondary btn-sm flex-grow-1 mb-0">
+            <i class="bi bi-upload me-1"></i> Importar Backup <input type="file" id="inputImportBackup" accept=".json" style="display:none;" onchange="importarBackup(event)">
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   function carregarDoStorage(chave, padrao) {
@@ -434,13 +483,19 @@
     }
   }
 
+  let configLoja = carregarDoStorage('app_config', {
+    nomeLoja: 'Minha Loja & Vendas',
+    whatsapp: '5511999999999',
+    chavePix: ''
+  });
+
   let clientes = carregarDoStorage('app_clientes', [
     { id: '1', nome: 'Cliente Geral / Balcão', telefone: '', email: '' }
   ]);
 
   let produtos = carregarDoStorage('app_produtos', [
-    { id: '1', nome: 'Perfume Floral Elegance', compra: 45, venda: 120, estoque: 8, foto: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400' },
-    { id: '2', nome: 'Relógio Smart Casual', compra: 80, venda: 199, estoque: 5, foto: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400' }
+    { id: '1', nome: 'Camisa Casual Premium', compra: 35, venda: 89.90, estoque: 12, foto: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800' },
+    { id: '2', nome: 'Tênis Esportivo Style', compra: 80, venda: 199.00, estoque: 6, foto: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800' }
   ]);
 
   let vendas = carregarDoStorage('app_vendas', []);
@@ -459,6 +514,7 @@
     if (inputData) {
       inputData.value = new Date().toISOString().split('T')[0];
     }
+    atualizarHeaderLoja();
     atualizarTudo();
     gerarCamposParcelas();
   });
@@ -467,73 +523,103 @@
     localStorage.setItem('app_produtos', JSON.stringify(produtos));
     localStorage.setItem('app_clientes', JSON.stringify(clientes));
     localStorage.setItem('app_vendas', JSON.stringify(vendas));
+    localStorage.setItem('app_config', JSON.stringify(configLoja));
     atualizarTudo();
+  }
+
+  function atualizarHeaderLoja() {
+    document.getElementById('headerNomeLoja').innerHTML = `<i class="bi bi-shop text-primary me-2"></i>${configLoja.nomeLoja}`;
+    document.getElementById('catalogoTituloLoja').innerText = configLoja.nomeLoja;
   }
 
   function atualizarTudo() {
     carregarSelects();
     renderProdutos();
-    renderCatalogo();
     renderClientes();
     renderVendas();
     renderCobrancas();
+    renderCatalogo();
     renderDashboards();
   }
 
   function abrirAbaClientes() {
-    const tabEl = document.querySelector('#clientes-tab');
-    bootstrap.Tab.getOrCreateInstance(tabEl).show();
+    bootstrap.Tab.getOrCreateInstance(document.querySelector('#clientes-tab')).show();
   }
 
   function abrirAbaProdutos() {
-    const tabEl = document.querySelector('#produtos-tab');
-    bootstrap.Tab.getOrCreateInstance(tabEl).show();
+    bootstrap.Tab.getOrCreateInstance(document.querySelector('#produtos-tab')).show();
   }
 
-  // --- CATÁLOGO / VITRINE DIGITAL ---
+  function abrirAbaCatalogo() {
+    bootstrap.Tab.getOrCreateInstance(document.querySelector('#catalogo-tab')).show();
+  }
+
+  function abrirModalConfig() {
+    document.getElementById('cfgNomeLoja').value = configLoja.nomeLoja || '';
+    document.getElementById('cfgWhatsapp').value = configLoja.whatsapp || '';
+    document.getElementById('cfgChavePix').value = configLoja.chavePix || '';
+    new bootstrap.Modal(document.getElementById('modalConfig')).show();
+  }
+
+  document.getElementById('formConfig').addEventListener('submit', (e) => {
+    e.preventDefault();
+    configLoja.nomeLoja = document.getElementById('cfgNomeLoja').value.trim() || 'Minha Loja';
+    configLoja.whatsapp = document.getElementById('cfgWhatsapp').value.replace(/\D/g, '');
+    configLoja.chavePix = document.getElementById('cfgChavePix').value.trim();
+    salvarDados();
+    atualizarHeaderLoja();
+    bootstrap.Modal.getInstance(document.getElementById('modalConfig')).hide();
+    alert('Configurações salvas!');
+  });
+
+  // --- CATÁLOGO DIGITAL (VITRINE EM 16:9) ---
   function renderCatalogo() {
-    const container = document.getElementById('gridCatalogo');
-    const termoBusca = (document.getElementById('buscaCatalogo').value || '').toLowerCase().trim();
-    container.innerHTML = '';
+    const grid = document.getElementById('gridCatalogo');
+    const busca = (document.getElementById('buscaCatalogo').value || '').toLowerCase();
+    grid.innerHTML = '';
 
-    const produtosFiltrados = produtos.filter(p => p.nome.toLowerCase().includes(termoBusca));
+    const prodsFiltrados = produtos.filter(p => p.nome.toLowerCase().includes(busca));
 
-    if (produtosFiltrados.length === 0) {
-      container.innerHTML = '<div class="col-12 text-center text-muted py-5"><h5>Nenhum produto encontrado no catálogo.</h5></div>';
+    if (prodsFiltrados.length === 0) {
+      grid.innerHTML = '<div class="col-12 text-center py-5 text-muted">Nenhum produto encontrado para exibição no catálogo.</div>';
       return;
     }
 
-    produtosFiltrados.forEach(p => {
-      const temEstoque = p.estoque > 0;
-      const card = document.createElement('div');
-      card.className = 'col-lg-3 col-md-4 col-sm-6';
+    prodsFiltrados.forEach(p => {
+      const msgWpp = encodeURIComponent(`Olá! Tenho interesse no produto *${p.nome}* no valor de ${formatMoney(p.venda)}. Ainda tem disponível?`);
+      const linkWpp = `https://wa.me/${configLoja.whatsapp}?text=${msgWpp}`;
 
-      const msgWhatsApp = encodeURIComponent(`Olá! Tenho interesse no produto *${p.nome}* que vi no seu catálogo pelo valor de *${formatMoney(p.venda)}*. Está disponível?`);
-
-      card.innerHTML = `
-        <div class="card h-100 catalogo-card">
-          <img src="${p.foto}" class="catalogo-img" alt="${p.nome}" onerror="this.src='https://placehold.co/400x300?text=Sem+Foto'">
+      const cardCol = document.createElement('div');
+      cardCol.className = 'col-sm-6 col-lg-4 col-xl-4';
+      cardCol.innerHTML = `
+        <div class="card catalogo-card h-100 shadow-sm">
+          <div class="catalogo-img-container">
+            <img src="${p.foto}" class="catalogo-img" alt="${p.nome}" onerror="this.src='https://placehold.co/800x450?text=Sem+Foto'">
+          </div>
           <div class="card-body d-flex flex-column justify-content-between p-3">
             <div>
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge ${temEstoque ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle'}">
-                  ${temEstoque ? 'Disponível' : 'Esgotado'}
-                </span>
-                <small class="text-muted">${p.estoque} em estoque</small>
+              <h5 class="fw-bold text-dark mb-2">${p.nome}</h5>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fs-4 fw-bold text-primary">${formatMoney(p.venda)}</span>
+                <span class="badge ${p.estoque > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger'}">${p.estoque > 0 ? 'Disponível' : 'Esgotado'}</span>
               </div>
-              <h6 class="fw-bold text-dark mt-2 mb-2">${p.nome}</h6>
             </div>
-            
-            <div class="pt-2 border-top mt-2">
-              <div class="catalogo-preco mb-2">${formatMoney(p.venda)}</div>
-              <a href="https://api.whatsapp.com/send?text=${msgWhatsApp}" target="_blank" class="btn btn-outline-success btn-sm w-100 fw-bold">
-                <i class="bi bi-whatsapp me-1"></i> Pedir no WhatsApp
-              </a>
-            </div>
+            <a href="${linkWpp}" target="_blank" class="btn btn-whatsapp w-100 py-2 ${p.estoque <= 0 ? 'disabled' : ''}">
+              <i class="bi bi-whatsapp me-1"></i> Pedir no WhatsApp
+            </a>
           </div>
         </div>
       `;
-      container.appendChild(card);
+      grid.appendChild(cardCol);
+    });
+  }
+
+  function copiarLinkCatalogo() {
+    const urlAtual = window.location.href.split('#')[0];
+    navigator.clipboard.writeText(urlAtual).then(() => {
+      alert('Link copiado para a área de transferência! Envie para seus clientes.');
+    }).catch(() => {
+      alert('Link da sua página: ' + urlAtual);
     });
   }
 
@@ -547,7 +633,7 @@
 
     selCliente.innerHTML = '<option value="">Selecione um cliente...</option>';
     if (clientes.length === 0) {
-      selCliente.innerHTML = '<option value="">Nenhum cliente cadastrado</option>';
+      selCliente.innerHTML = '<option value="">Nenhum cliente cadastrado (Cadastre primeiro!)</option>';
     } else {
       clientes.forEach(c => {
         const selected = (c.id === valorAtualCliente) ? 'selected' : '';
@@ -557,7 +643,7 @@
 
     selProduto.innerHTML = '<option value="">Selecione um produto...</option>';
     if (produtos.length === 0) {
-      selProduto.innerHTML = '<option value="">Nenhum produto cadastrado</option>';
+      selProduto.innerHTML = '<option value="">Nenhum produto cadastrado (Cadastre primeiro!)</option>';
     } else {
       produtos.forEach(p => {
         const selected = (p.id === valorAtualProduto) ? 'selected' : '';
@@ -597,8 +683,7 @@
     salvarDados();
     
     carregarSelects(novoId, null);
-    const tabVendas = document.querySelector('#vendas-tab');
-    bootstrap.Tab.getOrCreateInstance(tabVendas).show();
+    bootstrap.Tab.getOrCreateInstance(document.querySelector('#vendas-tab')).show();
   });
 
   function renderClientes() {
@@ -653,7 +738,7 @@
       produtos.push({
         id: targetId,
         nome, compra, venda, estoque,
-        foto: fotoBase64Temp || "https://placehold.co/400x300?text=Sem+Foto"
+        foto: fotoBase64Temp || "https://placehold.co/800x450?text=Sem+Foto"
       });
     }
 
@@ -716,7 +801,7 @@
     }
   }
 
-  // --- VENDAS & PARCELAMENTO ---
+  // --- VENDAS & GRADE DE PARCELAS ---
   function atualizarInfoProduto() {
     const prodId = document.getElementById('vendaProduto').value;
     const prod = produtos.find(p => p.id === prodId);
@@ -802,8 +887,7 @@
       details: detalhes
     });
 
-    const url = `https://calendar.google.com/calendar/render?${params.toString()}`;
-    window.open(url, '_blank');
+    window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, '_blank');
   }
 
   function adicionarTodasAoGoogleAgenda(vendaId) {
@@ -818,14 +902,14 @@
 
     pendentes.forEach((p, idx) => {
       setTimeout(() => {
-        const titulo = `Cobrança: ${venda.clienteNome} - Parcela ${p.numero}/${venda.numParcelas} (${formatMoney(p.valor)})`;
-        const detalhes = `Cobrança de Venda:\nCliente: ${venda.clienteNome}\nProduto: ${venda.produtoNome} (x${venda.qtd})\nParcela: ${p.numero} de ${venda.numParcelas}\nValor: ${formatMoney(p.valor)}\nForma: ${venda.formaPagamento}`;
+        const titulo = `Receber Parcela ${p.numero}/${venda.numParcelas} - ${venda.clienteNome} (${formatMoney(p.valor)})`;
+        const detalhes = `Cobrança:\nCliente: ${venda.clienteNome}\nProduto: ${venda.produtoNome} (x${venda.qtd})\nParcela: ${p.numero} de ${venda.numParcelas}\nValor: ${formatMoney(p.valor)}\nForma: ${venda.formaPagamento}`;
         abrirLinkGoogleAgenda(titulo, p.vencimento, detalhes);
       }, idx * 400);
     });
   }
 
-  // --- SUBMIT VENDA ---
+  // --- SUBMIT DA VENDA ---
   document.getElementById('formVenda').addEventListener('submit', (e) => {
     e.preventDefault();
     const clienteId = document.getElementById('vendaCliente').value;
@@ -841,7 +925,7 @@
 
     const produto = produtos.find(p => p.id === prodId);
     if (!produto) return alert('Por favor, selecione um produto.');
-    if (produto.estoque < qtd) return alert(`Estoque insuficiente! Disponível no estoque: ${produto.estoque}`);
+    if (produto.estoque < qtd) return alert(`Estoque insuficiente! Disponível: ${produto.estoque}`);
 
     const dataInputs = document.querySelectorAll('.parcela-data-input');
     const valorInputs = document.querySelectorAll('.parcela-valor-input');
@@ -899,7 +983,7 @@
     }
   });
 
-  // --- CONTAS A RECEBER ---
+  // --- CONTAS A RECEBER & COBRANÇAS ---
   function getStatusGeralVenda(venda) {
     if (!venda.parcelas || venda.parcelas.length === 0) return 'Recebido';
     const pendentes = venda.parcelas.filter(p => p.status === 'Pendente');
@@ -1013,7 +1097,7 @@
     }
   }
 
-  // --- HISTÓRICO & DASHBOARD ---
+  // --- HISTÓRICO & DASHBOARDS ---
   function renderVendas() {
     const tbodyUltimas = document.getElementById('listaUltimasVendas');
     const tbodyCompleto = document.getElementById('tabelaHistoricoCompleto');
@@ -1096,6 +1180,49 @@
       vendas = [];
       salvarDados();
     }
+  }
+
+  // --- BACKUP & RESTAURAÇÃO ---
+  function exportarBackup() {
+    const backup = {
+      config: configLoja,
+      produtos,
+      clientes,
+      vendas,
+      dataBackup: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup_sistema_vendas_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importarBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const dados = JSON.parse(e.target.result);
+        if (dados.produtos && dados.clientes && dados.vendas) {
+          produtos = dados.produtos;
+          clientes = dados.clientes;
+          vendas = dados.vendas;
+          if (dados.config) configLoja = dados.config;
+          salvarDados();
+          atualizarHeaderLoja();
+          alert('Backup restaurado com sucesso!');
+        } else {
+          alert('Arquivo de backup inválido.');
+        }
+      } catch(err) {
+        alert('Erro ao carregar o arquivo JSON.');
+      }
+    };
+    reader.readAsText(file);
   }
 </script>
 </body>
